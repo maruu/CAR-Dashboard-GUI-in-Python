@@ -1,0 +1,6 @@
+folium
+pyqt5
+PyQtWebEngine
+qtwidgets
+qtpy
+opencv-python
