@@ -89,14 +89,14 @@ class Ui_MainWindow(object):
         self.btn_music.setSizePolicy(sizePolicy)
         self.btn_music.setObjectName("btn_music")
         self.horizontalLayout.addWidget(self.btn_music)
-        self.btn_map = QtWidgets.QPushButton(self.frame)
+        #self.btn_map = QtWidgets.QPushButton(self.frame)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.btn_map.sizePolicy().hasHeightForWidth())
-        self.btn_map.setSizePolicy(sizePolicy)
-        self.btn_map.setObjectName("btn_map")
-        self.horizontalLayout.addWidget(self.btn_map)
+        #sizePolicy.setHeightForWidth(self.btn_map.sizePolicy().hasHeightForWidth())
+        #self.btn_map.setSizePolicy(sizePolicy)
+        #self.btn_map.setObjectName("btn_map")
+        #self.horizontalLayout.addWidget(self.btn_map)
         self.frame_dashboard = QtWidgets.QFrame(self.centralwidget)
         self.frame_dashboard.setEnabled(True)
         self.frame_dashboard.setGeometry(QtCore.QRect(70, 120, 971, 411))
@@ -663,7 +663,7 @@ class Ui_MainWindow(object):
         self.webcam.setObjectName(u"webcam")
         self.webcam.setGeometry(QRect(500, 40, 321, 331))
 
-    
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.show_Dash()
         self.progress()
@@ -708,7 +708,7 @@ class Ui_MainWindow(object):
         self.btn_dash.setText(_translate("MainWindow", "DASHBOARD"))
         self.btn_ac.setText(_translate("MainWindow", "AC"))
         self.btn_music.setText(_translate("MainWindow", "MUSIC"))
-        self.btn_map.setText(_translate("MainWindow", "MAP"))
+        #self.btn_map.setText(_translate("MainWindow", "MAP"))
         self.date.setText(_translate("MainWindow", "Date - Time-"))
         self.label_7.setText(_translate("MainWindow", "Locked"))
         self.label_5.setText(_translate("MainWindow", "Open"))
@@ -743,7 +743,7 @@ class Ui_MainWindow(object):
         self.btn_dash.clicked.connect(self.show_Dash)
         self.btn_ac.clicked.connect(self.show_AC)
         self.btn_music.clicked.connect(self.show_Music)
-        self.btn_map.clicked.connect(self.show_Map)
+        #self.btn_map.clicked.connect(self.show_Map)
 
 
 

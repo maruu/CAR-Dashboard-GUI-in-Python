@@ -52,9 +52,9 @@ except:
 
 class AnalogGaugeWidget(QWidget):
     """Fetches rows from a Bigtable.
-    Args: 
+    Args:
         none
-    
+
     """
     valueChanged = pyqtSignal(int)
 
@@ -185,9 +185,9 @@ class AnalogGaugeWidget(QWidget):
         self.change_value_needle_style([QPolygon([
             QPoint(4, 30),
             QPoint(-4, 30),
-            QPoint(-2, - self.widget_diameter / 2 * self.needle_scale_factor),
-            QPoint(0, - self.widget_diameter / 2 * self.needle_scale_factor - 6),
-            QPoint(2, - self.widget_diameter / 2 * self.needle_scale_factor)
+            QPoint(-2, int(- self.widget_diameter / 2 * self.needle_scale_factor)),
+            QPoint(0, int(- self.widget_diameter / 2 * self.needle_scale_factor - 6)),
+            QPoint(2, int(- self.widget_diameter / 2 * self.needle_scale_factor))
         ])])
         # needle = [QPolygon([
         #     QPoint(4, 4),
@@ -200,8 +200,8 @@ class AnalogGaugeWidget(QWidget):
         # needle = [2]
         # print(str(type(needle[0])).split("'")[1])
 
-        self.scale_fontsize = self.initial_scale_fontsize * self.widget_diameter / 400
-        self.value_fontsize = self.initial_value_fontsize * self.widget_diameter / 400
+        self.scale_fontsize = int(self.initial_scale_fontsize * self.widget_diameter / 400)
+        self.value_fontsize = int(self.initial_value_fontsize * self.widget_diameter / 400)
 
         # print("slotMethod end")
         pass
@@ -488,7 +488,7 @@ class AnalogGaugeWidget(QWidget):
                 (((self.widget_diameter / 2) - (self.pen.width() / 2)) * self.gauge_color_inner_radius_factor),
                 self.scale_angle_start_value, self.scale_angle_size)
 
-            gauge_rect = QRect(QPoint(0, 0), QSize(self.widget_diameter / 2 - 1, self.widget_diameter - 1))
+            gauge_rect = QRect(QPoint(0, 0), QSize(int(self.widget_diameter / 2 - 1), int(self.widget_diameter - 1)))
             grad = QConicalGradient(QPointF(0, 0), - self.scale_angle_size - self.scale_angle_start_value +
                                     self.angle_offset - 1)
 
@@ -523,8 +523,8 @@ class AnalogGaugeWidget(QWidget):
 
         my_painter.rotate(self.scale_angle_start_value - self.angle_offset)
         steps_size = (float(self.scale_angle_size) / float(self.scala_main_count))
-        scale_line_outer_start = self.widget_diameter/2
-        scale_line_lenght = (self.widget_diameter / 2) - (self.widget_diameter / 20)
+        scale_line_outer_start = int(self.widget_diameter/2)
+        scale_line_lenght = int((self.widget_diameter / 2) - (self.widget_diameter / 20))
         # print(stepszize)
         for i in range(self.scala_main_count+1):
             my_painter.drawLine(scale_line_lenght, 0, scale_line_outer_start, 0)
@@ -562,7 +562,7 @@ class AnalogGaugeWidget(QWidget):
             x = text_radius * math.cos(math.radians(angle))
             y = text_radius * math.sin(math.radians(angle))
             # print(w, h, x, y, text)
-            text = [x - int(w/2), y - int(h/2), int(w), int(h), Qt.AlignCenter, text]
+            text = [int(x - int(w/2)), int(y - int(h/2)), int(w), int(h), Qt.AlignCenter, text]
             painter.drawText(text[0], text[1], text[2], text[3], text[4], text[5])
         # painter.restore()
 
@@ -577,8 +577,8 @@ class AnalogGaugeWidget(QWidget):
         my_painter.setPen(Qt.black)
         my_painter.rotate(self.scale_angle_start_value - self.angle_offset)
         steps_size = (float(self.scale_angle_size) / float(self.scala_main_count * self.scala_subdiv_count))
-        scale_line_outer_start = self.widget_diameter/2
-        scale_line_lenght = (self.widget_diameter / 2) - (self.widget_diameter / 40)
+        scale_line_outer_start = int(self.widget_diameter/2)
+        scale_line_lenght = int((self.widget_diameter / 2) - (self.widget_diameter / 40))
         for i in range((self.scala_main_count * self.scala_subdiv_count)+1):
             my_painter.drawLine(scale_line_lenght, 0, scale_line_outer_start, 0)
             my_painter.rotate(steps_size)
@@ -619,7 +619,7 @@ class AnalogGaugeWidget(QWidget):
         x = text_radius * math.cos(math.radians(angle))
         y = text_radius * math.sin(math.radians(angle))
         # print(w, h, x, y, text)
-        text = [x - int(w/2), y - int(h/2), int(w), int(h), Qt.AlignCenter, text]
+        text = [int(x - int(w/2)), int(y - int(h/2)), int(w), int(h), Qt.AlignCenter, text]
         painter.drawText(text[0], text[1], text[2], text[3], text[4], text[5])
         # painter.restore()
 
