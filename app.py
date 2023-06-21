@@ -14,6 +14,9 @@ from PyQt5.QtGui import QImage
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QTimer
 
+import time
+import random
+
 # import Opencv module
 import cv2
 
@@ -740,10 +743,6 @@ class Ui_MainWindow(object):
         self.pushButton_5.setText(_translate("MainWindow", "Start"))
         self.pushButton_6.setText(_translate("MainWindow", "Stop"))
         #btn function
-        self.btn_dash.clicked.connect(self.show_Dash)
-        self.btn_ac.clicked.connect(self.show_AC)
-        self.btn_music.clicked.connect(self.show_Music)
-        #self.btn_map.clicked.connect(self.show_Map)
 
 
 
@@ -781,6 +780,7 @@ class Ui_MainWindow(object):
 
     def progress(self):
         self.speed.set_MaxValue(100)
+        self.speed.set_MinValue(0)
         self.speed.set_DisplayValueColor(200,200,200)
         self.speed.set_CenterPointColor(255,255,255)
         self.speed.set_NeedleColor(255,255,200)
@@ -789,29 +789,153 @@ class Ui_MainWindow(object):
         self.speed.set_enable_big_scaled_grid(True)
         self.speed.set_enable_barGraph(False)
         self.speed.set_enable_filled_Polygon(False)
-        self.speed.update_value(65)
-
+        self.speed.update_value(0)
 
         self.rpm.set_scala_main_count(6)
         self.rpm.set_MaxValue(6)
         self.rpm.set_MinValue(0)
-        self.rpm.update_value(3.5)
         self.rpm.set_DisplayValueColor(200,200,200)
         self.rpm.set_enable_big_scaled_grid(True)
-        self.rpm.set_ScaleValueColor(255,255,255)
-        #self.rpm.set_NeedleColor(155,155,100)
+        self.rpm.set_ScaleValueColor(255,200,255)
+        self.rpm.set_NeedleColor(255,255,200)
         self.rpm.set_NeedleColorDrag(255,255,255)
         self.rpm.set_CenterPointColor(255,255,255)
+        self.rpm.update_value(0)
 
+ui = Ui_MainWindow()
 
 import resources
+
+import threading
+
+import asyncio
+import logging
+import socket
+
+import someip.header
+from someip.config import Eventgroup, _T_SOCKNAME
+from someip.sd import SOMEIPDatagramProtocol, ServiceDiscoveryProtocol
+
+logging.getLogger("someip.sd").setLevel(logging.WARNING)
+logging.getLogger("someip.sd.announce").setLevel(logging.WARNING)
+
+
+def enhex(buf, sep=" "):
+    return sep.join("%02x" % b for b in buf)
+
+
+class EventGroupReceiver(SOMEIPDatagramProtocol):
+    def __init__(self):
+        super().__init__(logger="notification")
+
+    def message_received(
+        self,
+        someip_message: someip.header.SOMEIPHeader,
+        addr: _T_SOCKNAME,
+        multicast: bool,
+    ) -> None:
+        """
+        called when a well-formed SOME/IP datagram was received
+        """
+        if someip_message.message_type != someip.header.SOMEIPMessageType.NOTIFICATION:
+            self.log.warning("unexpected message type: %s", someip_message)
+            return
+        self.log.info(
+            "service=0x%04x method=0x%04x interface_version=0x%02x"
+            " returncode=%s payload=%s",
+            someip_message.service_id,
+            someip_message.method_id,
+            someip_message.interface_version,
+            someip_message.return_code.name,
+            enhex(someip_message.payload),
+        )
+
+        if someip_message.method_id == 0x8001:
+            ui.speed.update_value(int(someip_message.payload[0]))
+        elif someip_message.method_id == 0x8002:
+            ui.rpm.update_value(int(someip_message.payload[0]))
+
+
+async def run(
+    local_addr, multicast_addr, local_port, service_id, instance_id, major_version, evgid
+):
+    trsp_u, trsp_m, protocol = await ServiceDiscoveryProtocol.create_endpoints(
+        family=socket.AF_INET,
+        local_addr=str(local_addr),
+        multicast_addr=str(multicast_addr),
+        port=30490,
+    )
+
+    evgrp_receiver, _ = await EventGroupReceiver.create_unicast_endpoint(
+        local_addr=(str(local_addr), local_port)
+    )
+    sockname = evgrp_receiver.get_extra_info("sockname")
+
+    try:
+        protocol.start()
+        protocol.discovery.find_subscribe_eventgroup(
+            Eventgroup(
+                service_id=service_id,
+                instance_id=instance_id,
+                major_version=major_version,
+                eventgroup_id=evgid,
+                sockname=sockname,
+                protocol=someip.header.L4Protocols.UDP,
+            )
+        )
+        while True:
+            await asyncio.sleep(1)
+    finally:
+        protocol.stop()
+        evgrp_receiver.close()
+        trsp_u.close()
+        trsp_m.close()
+
+
+def setup_log(fmt="", **kwargs):
+    try:
+        import coloredlogs  # type: ignore[import]
+        coloredlogs.install(fmt="%(asctime)s,%(msecs)03d " + fmt, **kwargs)
+    except ModuleNotFoundError:
+        logging.basicConfig(format="%(asctime)s " + fmt, **kwargs)
+        logging.info("install coloredlogs for colored logs :-)")
+
+
+def thread_func():
+    setup_log(level=logging.DEBUG, fmt="%(levelname)-8s %(name)s: %(message)s")
+
+    try:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        asyncio.get_event_loop().run_until_complete(
+            run(
+                "192.168.56.1",
+                "224.0.0.1",
+                1111,
+                0xB0A7,
+                1,
+                1,
+                1,
+            )
+        )
+    except KeyboardInterrupt:
+        pass
+
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
+
     MainWindow.show()
-    sys.exit(app.exec_())
+
+    x = threading.Thread(target=thread_func)
+    x.start()
+
+    ret = app.exec_()
+
+    x.join()
+
+    sys.exit(ret)
 

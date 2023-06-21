@@ -4,3 +4,4 @@ PyQtWebEngine
 qtwidgets
 qtpy
 opencv-python
+someip
